@@ -9,11 +9,28 @@ class App extends React.Component {
     this.state = {
       input: "",
       error: "",
-      stock: ""
+      stock: "",
+      show: false,
+      text: "Add +"
     };
     this.updateInput = this.updateInput.bind(this);
     this.lookup = this.lookup.bind(this);
     this.add = this.add.bind(this);
+    this.addInput = this.addInput.bind(this);
+  }
+
+  addInput(e) {
+    if (this.state.show == false) {
+      this.setState({
+        show: true,
+        text: "Cancel"
+      });
+    } else {
+      this.setState({
+        show: false,
+        text: "Add +"
+      });
+    }
   }
 
   updateInput(e) {
@@ -31,7 +48,9 @@ class App extends React.Component {
       console.log(data.symbol)
       this.setState({
         error: "",
-        stock: data.symbol
+        stock: data.symbol,
+        show: false,
+        text: "Add +"
       }, function addTo() {
             this.add()
             if (this.state.stock == "") {
@@ -64,17 +83,22 @@ add() {
       <div className="row">
         <div className="col-md-3"></div>
           <div className="col-md-6">
+          {this.state.show &&
+            <div>
               <div className="form-group">
                 <label htmlFor="exampleInputEmail1">Stock Symbol</label>
                 <input value={this.state.input} onChange={this.updateInput} type="text" className="form-control" placeholder="Enter symbol"/>
                 <small id="emailHelp" className="form-text text-muted">{this.state.error}</small>
               </div>
               <button onClick={this.lookup} className="btn btn-dark">Add</button>
+            </div>
+            }
           </div>
-        <div className="col-md-3"></div>
+        <div className="col-md-3"><button onClick={this.addInput} className="right btn btn-warning">{this.state.text}</button></div>
       </div>
       <div className="row">
         <div className="col-md-12">
+        {!this.state.show &&
           <table className="table table-dark">
             <thead>
               <tr>
@@ -105,6 +129,7 @@ add() {
               </tr>
             </tbody>
           </table>
+        }
         </div>
       </div>
     </div>
