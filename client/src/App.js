@@ -8,10 +8,12 @@ class App extends React.Component {
     super(props);
     this.state = {
       input: "",
-      error: ""
+      error: "",
+      stock: ""
     };
     this.updateInput = this.updateInput.bind(this);
     this.lookup = this.lookup.bind(this);
+    this.add = this.add.bind(this);
   }
 
   updateInput(e) {
@@ -26,21 +28,39 @@ class App extends React.Component {
     fetch(`https://financialmodelingprep.com/api/company/real-time-price/${this.state.input}?datatype=json`)
     .then((resp) => resp.json())
     .then((data) => {
-      console.log(data)
+      console.log(data.symbol)
       this.setState({
-        error: ""
-      })
-    })
-    .catch((error) => {
-      this.setState({
-        error: "this is not a stock symbol.  Please try again."
+        error: "",
+        stock: data.symbol
+      }, function addTo() {
+            this.add()
+            if (this.state.stock == "") {
+              this.setState({
+                error: "This is not a known stock symbol.  Please try again."
+              })
+            }
       })
     })
   }
+
+add() {
+  console.log(this.state.stock)
+  fetch('/add', {
+    method: 'POST',
+    body: JSON.stringify("test")
+  })
+  // .then(response => response.json())
+  // .then(response => 
+  //   this.setState({
+  //     stock: ""
+  //   }))
+  // .catch(error => console.error('Error:', error));
+}
+  
   
   render() {
     return (
-    <div className="container">
+    <div className="container-fluid">
       <div className="row">
         <div className="col-md-3"></div>
           <div className="col-md-6">
@@ -49,7 +69,7 @@ class App extends React.Component {
                 <input value={this.state.input} onChange={this.updateInput} type="text" className="form-control" placeholder="Enter symbol"/>
                 <small id="emailHelp" className="form-text text-muted">{this.state.error}</small>
               </div>
-              <button onClick={this.lookup} className="btn btn-dark">Submit</button>
+              <button onClick={this.lookup} className="btn btn-dark">Add</button>
           </div>
         <div className="col-md-3"></div>
       </div>
