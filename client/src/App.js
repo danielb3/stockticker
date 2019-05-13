@@ -3,26 +3,59 @@ import logo from './logo.svg';
 import './App.css';
 
 class App extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      input: "",
+      error: ""
+    };
+    this.updateInput = this.updateInput.bind(this);
+    this.lookup = this.lookup.bind(this);
+  }
+
+  updateInput(e) {
+    this.setState({
+      input: e.target.value
+    });
+  }
+
+  lookup() {
+    console.log("works")
+    console.log(this.state.input)
+    fetch(`https://financialmodelingprep.com/api/company/real-time-price/${this.state.input}?datatype=json`)
+    .then((resp) => resp.json())
+    .then((data) => {
+      console.log(data)
+      this.setState({
+        error: ""
+      })
+    })
+    .catch((error) => {
+      this.setState({
+        error: "this is not a stock symbol.  Please try again."
+      })
+    })
+  }
+  
   render() {
     return (
     <div className="container">
       <div className="row">
         <div className="col-md-3"></div>
           <div className="col-md-6">
-            <form>
-              <div class="form-group">
-                <label for="exampleInputEmail1">Stock Symbol</label>
-                <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter symbol"/>
-                <small id="emailHelp" class="form-text text-muted"></small>
+              <div className="form-group">
+                <label htmlFor="exampleInputEmail1">Stock Symbol</label>
+                <input value={this.state.input} onChange={this.updateInput} type="text" className="form-control" placeholder="Enter symbol"/>
+                <small id="emailHelp" className="form-text text-muted">{this.state.error}</small>
               </div>
-              <button type="submit" class="btn btn-dark">Submit</button>
-            </form>
+              <button onClick={this.lookup} className="btn btn-dark">Submit</button>
           </div>
         <div className="col-md-3"></div>
       </div>
       <div className="row">
         <div className="col-md-12">
-          <table class="table table-dark">
+          <table className="table table-dark">
             <thead>
               <tr>
                 <th scope="col">#</th>
