@@ -52,9 +52,9 @@ class App extends React.Component {
     console.log("works")
     console.log(this.state.input)
     fetch(`https://financialmodelingprep.com/api/company/real-time-price/${this.state.input}?datatype=json`)
-    .then((resp) => {console.log(resp.status)})
+    .then((resp) => resp.json())
     .then((data) => {
-      return;
+      if (data.symbol === this.state.input) {
         console.log(data.symbol)
         this.setState({
           error: "",
@@ -65,10 +65,13 @@ class App extends React.Component {
         }, function addTo() {
               this.add()
         })
-    }).catch(err =>
-      this.setState({
-        error: "This is not a known stock symbol.  Please try again.  Ex. AAPL"
-    }));
+      } else {
+        this.setState({
+          error: "This is not a known stock symbol.  Please try again.  Ex. AAPL"
+        })
+      }
+      
+    })
   }
 
 add() {
