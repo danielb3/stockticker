@@ -23,7 +23,7 @@ app.get('/',function(req,res){
 
 });
 
-app.post('/add', function(req,res) {
+app.post('/api/add', function(req,res) {
   res.send(req.body.stock)
   MongoClient.connect(url, function(err, db) {
     if (err) throw err;
@@ -37,7 +37,7 @@ app.post('/add', function(req,res) {
   });
 })
 
-app.get('/display', function(req, res) {
+app.get('/api/display', function(req, res) {
   MongoClient.connect(url, function(err, db) {
     if (err) throw err;
     var dbo = db.db("stocks");
@@ -49,7 +49,7 @@ app.get('/display', function(req, res) {
   }); 
 })
 
-app.post('/del', function(req, res) {
+app.post('/api/del', function(req, res) {
   console.log(req.body.stock)
   MongoClient.connect(url, function(err, db) {
     if (err) throw err;

@@ -46,67 +46,76 @@ class App extends React.Component {
   }
 
   lookup() {
+    this.setState({
+      error: "Please Wait",
+    })
     console.log("works")
     console.log(this.state.input)
     fetch(`https://financialmodelingprep.com/api/company/real-time-price/${this.state.input}?datatype=json`)
-    .then((resp) => resp.json())
+    .then((resp) => {console.log(resp.status)})
     .then((data) => {
-      console.log(data.symbol)
+      return;
+        console.log(data.symbol)
+        this.setState({
+          error: "",
+          stock: data.symbol,
+          show: false,
+          text: "Add +",
+          prices: []
+        }, function addTo() {
+              this.add()
+        })
+    }).catch(err =>
       this.setState({
-        error: "",
-        stock: data.symbol,
-        show: false,
-        text: "Add +",
-        prices: []
-      }, function addTo() {
-            this.add()
-            if (this.state.stock == "") {
-              this.setState({
-                error: "This is not a known stock symbol.  Please try again.  Ex. AAPL"
-              })
-            }
-      })
-    })
+        error: "This is not a known stock symbol.  Please try again.  Ex. AAPL"
+    }));
   }
 
 add() {
-  $.post("/add",
-  {
-    stock: this.state.stock,
-  },
-  function(data, status){
-    console.log("Data: " + data + "\nStatus: " + status);
-  });
-  this.componentDidMount()
+  fetch('/api/add', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ stock: this.state.stock }),
+  }).then(() =>
+  this.setState({
+    error: "",
+    input: ""
+  }))
+  .then(response => {this.updateDisplay()})
+  .catch(error => console.error('Error:', error));
 }
 
 del(e) {
+  console.log("works")
   let sName = e.target.value
-  $.post("/del",
-  {
-    stock: sName
-  },
-  function(data, status){
-    console.log("Data: " + data + "\nStatus: " + status);
-    
-  });
-  this.componentDidMount()
+  console.log(sName)
+
+  fetch('/api/del', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ stock: sName }),
+  }).then((res) => {console.log(res)})
+  .then(response => {this.updateDisplay()})
+  .catch(error => console.error('Error:', error));
 }
 
 updateDisplay() {
-    $.get("/display", function(data, status){
+    $.get("/api/display", function(data, status){
       console.log("Data: "+JSON.stringify(data))
       this.setState({
         stocks: data,
         number: data.length,
         prices: []
-      })
+      }, () => {this.prices()})
     }.bind(this))
   }
 
 componentWillMount() {
   this.updateDisplay()
-  setTimeout(this.prices, 4000)
 }
 
 prices() {
