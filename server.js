@@ -57,7 +57,7 @@ app.post('/api/del', function(req, res) {
     var myquery = { symbol: req.body.stock };
     dbo.collection("symbol").deleteOne(myquery, function(err, obj) {
       if (err) throw err;
-      console.log("1 document deleted");
+      res.send("1 document deleted");
       db.close();
     });
   }); 
