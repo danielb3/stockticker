@@ -14,14 +14,15 @@ class App extends React.Component {
       show: false,
       text: "Add +",
       stocks: [],
-      prices: []
+      prices: [],
+      number: 0
     };
     this.updateInput = this.updateInput.bind(this);
     this.lookup = this.lookup.bind(this);
     this.add = this.add.bind(this);
     this.addInput = this.addInput.bind(this);
-    // this.displayStocks = this.displayStocks.bind(this);
-    // this.price = this.price.bind(this);
+    this.updateDisplay = this.updateDisplay.bind(this);
+    this.del = this.del.bind(this);
   }
 
   addInput(e) {
@@ -55,7 +56,8 @@ class App extends React.Component {
         error: "",
         stock: data.symbol,
         show: false,
-        text: "Add +"
+        text: "Add +",
+        prices: []
       }, function addTo() {
             this.add()
             if (this.state.stock == "") {
@@ -75,39 +77,55 @@ add() {
   function(data, status){
     console.log("Data: " + data + "\nStatus: " + status);
   });
+  this.componentDidMount()
 }
 
-componentWillMount() {
+del(e) {
+  let sName = e.target.value
+  $.post("/del",
+  {
+    stock: sName
+  },
+  function(data, status){
+    console.log("Data: " + data + "\nStatus: " + status);
+    
+  });
+  this.componentDidMount()
+}
+
+updateDisplay() {
     $.get("/display", function(data, status){
       console.log("Data: "+JSON.stringify(data))
       this.setState({
-        stocks: data
+        stocks: data,
+        number: data.length,
+        prices: []
       })
     }.bind(this))
   }
 
-componentDidMount() {
-  this.timerID = setInterval(
-    () => this.prices(),
-    5000
-  );
+componentWillMount() {
+  this.updateDisplay()
+  setTimeout(this.prices, 4000)
 }
 
 prices() {
+  console.log("works")
     this.state.stocks.map((x, i) => 
     $.get(`https://financialmodelingprep.com/api/company/real-time-price/${{x}.x.symbol}?datatype=json`, function(data, status){
       console.log("Data: "+data)
-      if (this.state.prices != JSON.parse([data])) {
+      if (this.state.prices.length === this.state.number) {
         this.setState({
-          prices: this.state.prices.concat(JSON.parse([data]))
+          prices: this.state.prices
         })
       } else {
         this.setState({
-          prices: [].concat(JSON.parse([data]))
+          prices: this.state.prices.concat(JSON.parse([data]))
         })
       }
     }.bind(this)));
-    console.log(this.state.prices.map(x => x.price))
+    console.log(this.state.prices.length)
+    console.log(this.state.number)
   }
 
   render() {
@@ -127,8 +145,8 @@ prices() {
             </div>
             }
           </div>
-            <div className="col-md-3"><button onClick={this.displayStocks} className="right btn btn-danger">Show</button></div>
-            <div className="col-md-3"><button onClick={this.price} className="right btn btn-danger">Price</button></div>
+            {/* <div className="col-md-3"><button onClick={this.displayStocks} className="right btn btn-danger">Show</button></div>
+            <div className="col-md-3"><button onClick={this.price} className="right btn btn-danger">Price</button></div> */}
             <div className="col-md-3"><button onClick={this.addInput} className="right btn btn-warning">{this.state.text}</button></div>
       </div>
       <div className="row">
@@ -149,7 +167,7 @@ prices() {
                   <td scope="row">{i}</td>
                   <td>{x.symbol}</td>
                   <td>{x.price}</td>
-                  <td><button className="right btn btn-danger">X</button></td>
+                  <td><button value={x.symbol} onClick={this.del} className="right btn btn-danger">X</button></td>
                 </tr>
               )}
               

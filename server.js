@@ -49,7 +49,31 @@ app.get('/display', function(req, res) {
   }); 
 })
 
+app.post('/del', function(req, res) {
+  console.log(req.body.stock)
+  MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("stocks");
+    var myquery = { symbol: req.body.stock };
+    dbo.collection("symbol").deleteOne(myquery, function(err, obj) {
+      if (err) throw err;
+      console.log("1 document deleted");
+      db.close();
+    });
+  }); 
+})
 
+
+// MongoClient.connect(url, function(err, db) {
+//   if (err) throw err;
+//   var dbo = db.db("stocks");
+//   var myquery = { symbol: /^C/ };
+//   dbo.collection("symbol").deleteMany(myquery, function(err, obj) {
+//     if (err) throw err;
+//     console.log(obj.result.n + " document(s) deleted");
+//     db.close();
+//   });
+// }); 
 
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
