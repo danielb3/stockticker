@@ -1,6 +1,7 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import $ from 'jquery';
 
 class App extends React.Component {
 
@@ -11,12 +12,16 @@ class App extends React.Component {
       error: "",
       stock: "",
       show: false,
-      text: "Add +"
+      text: "Add +",
+      stocks: [],
+      prices: []
     };
     this.updateInput = this.updateInput.bind(this);
     this.lookup = this.lookup.bind(this);
     this.add = this.add.bind(this);
     this.addInput = this.addInput.bind(this);
+    // this.displayStocks = this.displayStocks.bind(this);
+    // this.price = this.price.bind(this);
   }
 
   addInput(e) {
@@ -55,7 +60,7 @@ class App extends React.Component {
             this.add()
             if (this.state.stock == "") {
               this.setState({
-                error: "This is not a known stock symbol.  Please try again."
+                error: "This is not a known stock symbol.  Please try again.  Ex. AAPL"
               })
             }
       })
@@ -63,20 +68,48 @@ class App extends React.Component {
   }
 
 add() {
-  console.log(this.state.stock)
-  fetch('/add', {
-    method: 'POST',
-    body: JSON.stringify("test")
-  })
-  // .then(response => response.json())
-  // .then(response => 
-  //   this.setState({
-  //     stock: ""
-  //   }))
-  // .catch(error => console.error('Error:', error));
+  $.post("/add",
+  {
+    stock: this.state.stock,
+  },
+  function(data, status){
+    console.log("Data: " + data + "\nStatus: " + status);
+  });
 }
-  
-  
+
+componentWillMount() {
+    $.get("/display", function(data, status){
+      console.log("Data: "+JSON.stringify(data))
+      this.setState({
+        stocks: data
+      })
+    }.bind(this))
+  }
+
+componentDidMount() {
+  this.timerID = setInterval(
+    () => this.prices(),
+    5000
+  );
+}
+
+prices() {
+    this.state.stocks.map((x, i) => 
+    $.get(`https://financialmodelingprep.com/api/company/real-time-price/${{x}.x.symbol}?datatype=json`, function(data, status){
+      console.log("Data: "+data)
+      if (this.state.prices != JSON.parse([data])) {
+        this.setState({
+          prices: this.state.prices.concat(JSON.parse([data]))
+        })
+      } else {
+        this.setState({
+          prices: [].concat(JSON.parse([data]))
+        })
+      }
+    }.bind(this)));
+    console.log(this.state.prices.map(x => x.price))
+  }
+
   render() {
     return (
     <div className="container-fluid">
@@ -94,7 +127,9 @@ add() {
             </div>
             }
           </div>
-        <div className="col-md-3"><button onClick={this.addInput} className="right btn btn-warning">{this.state.text}</button></div>
+            <div className="col-md-3"><button onClick={this.displayStocks} className="right btn btn-danger">Show</button></div>
+            <div className="col-md-3"><button onClick={this.price} className="right btn btn-danger">Price</button></div>
+            <div className="col-md-3"><button onClick={this.addInput} className="right btn btn-warning">{this.state.text}</button></div>
       </div>
       <div className="row">
         <div className="col-md-12">
@@ -103,30 +138,21 @@ add() {
             <thead>
               <tr>
                 <th scope="col">#</th>
-                <th scope="col">First</th>
-                <th scope="col">Last</th>
-                <th scope="col">Handle</th>
+                <th scope="col">Stock</th>
+                <th scope="col">Price</th>
+                <th scope="col"></th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <th scope="row">1</th>
-                <td>Mark</td>
-                <td>Otto</td>
-                <td>@mdo</td>
-              </tr>
-              <tr>
-                <th scope="row">2</th>
-                <td>Jacob</td>
-                <td>Thornton</td>
-                <td>@fat</td>
-              </tr>
-              <tr>
-                <th scope="row">3</th>
-                <td>Larry</td>
-                <td>the Bird</td>
-                <td>@twitter</td>
-              </tr>
+              {this.state.prices.map((x, i) =>
+                <tr key={i}>
+                  <td scope="row">{i}</td>
+                  <td>{x.symbol}</td>
+                  <td>{x.price}</td>
+                  <td><button className="right btn btn-danger">X</button></td>
+                </tr>
+              )}
+              
             </tbody>
           </table>
         }
