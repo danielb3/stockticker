@@ -144,7 +144,7 @@ prices() {
     return (
     <div className="container-fluid">
       <div className="row">
-        <div className="col-md-3"></div>
+        <div className="col-md-3"><button onClick={this.updateDisplay} className="btn btn-danger">Refresh &#8635;</button></div>
           <div className="col-md-6">
           {this.state.show &&
             <div>
@@ -176,9 +176,9 @@ prices() {
             <tbody>
               {this.state.prices.map((x, i) =>
                 <tr key={i}>
-                  <td scope="row">{i}</td>
+                  <td scope="row">{i+1}</td>
                   <td>{x.symbol}</td>
-                  <td>{x.price}</td>
+                  <td>${x.price}</td>
                   <td><button value={x.symbol} onClick={this.del} className="right btn btn-danger">X</button></td>
                 </tr>
               )}
